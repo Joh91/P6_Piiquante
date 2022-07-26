@@ -4,7 +4,7 @@ const app = express();
 app.use(express.json()); 
 
 //connexion aux routes 
-const stuffRoutes = require('./routes/stuff');
+const saucesRoutes = require('./routes/sauces');
 const userRoutes = require('./routes/user');
 
 //connexion à la database
@@ -21,12 +21,15 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
     next();
-  });
+});
 
+//chemin du server 
+const path = require('path');
 
 // Utilisation  du router pour définir les routes 
-app.use('/api/stuff', stuffRoutes);
+app.use('/api/sauces', saucesRoutes);
 app.use('/api/auth', userRoutes);
+app.use("/images", express.static(path.join(__dirname, "images")))
 
 
 //exportation d'Express
