@@ -2,7 +2,7 @@ const User = require("../models/User");
 // bcrypt va nous permettre de hasher le mdp  
 const bcrypt = require("bcrypt"); 
 
-const jsonwebtoken = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 
 // création de compte 
 exports.signup = (req, res, next) => {
@@ -15,7 +15,7 @@ exports.signup = (req, res, next) => {
             });
             user.save()
             .then(() => res.status(201).json({ message: "Utilisateur crée !"})) 
-            .catch(err => res.status(400).json({error})); 
+            .catch(err => res.status(400).json({ error })); 
         })
         .catch(err => res.status(500).json({error}))
 };
@@ -34,7 +34,7 @@ exports.login = (req, res, next) => {
                 } else {
                     res.status(200).json({
                         userId: user._id,
-                        token: jsonwebtoken.sign(
+                        token: jwt.sign(
                             {userId: user._id},
                             "RANDOM_TOKEN_SECRET",
                             {expiresIn: "24h"}
