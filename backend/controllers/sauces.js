@@ -41,24 +41,30 @@ exports.getAllSauce = (req, res, next) => {
 
 /*--------- requête PUT ----------*/
 exports.modifySauce = (req, res, next) => {
-  //req.files ? permet de vérifier si un fichier à été fourni
-  const sauceObject = req.files ? {
+  //valeurs à modifier; "req files ? " vérifie si un fichier à été ajouté 
+  //1er cas: un nouveau fichier est retourné 
+  const sauceObject = req.file 
+  ? {
     ...JSON.parse(req.body.sauce),
     imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
   } 
-  // si il n'y a pas de fichier, on traite directement l'objet 
-   : {...req.body}; 
+  //2e cas: pas de nouveau fichier ajouté
+  : {...req.body}; 
 
+  //suppression de l'user id dans notre objet pour des raisons de sécurité 
   delete sauceObject.user_id; 
-  // l'objet est obtenu directement auprès de notre BDD
-  Sauce.findOne({_id: req.params.id})
+  
+
+  Sauce.findOneAndUpdate({_id: req.params.id}, {...sauceObject, _id: req.params.id})
   .then((sauce) => {
+    //auth
     if (sauce.userId != req.auth.userId){
         res.status(401).json({ message : "Non-autorisé"});
     } else {
-        Sauce.updateOne({_id: req.params.id}, {...sauceObject, _id: req.params.id})
-        .then(() => res.status(200).json ({message: "Produit modifié !"}))
-        .catch(error => res.status(401).json({ error }));
+      //récupération du fichier précédent et suppression
+        let oldFile = sauce.imageUrl.split('images/')[1];
+        fs.unlink(`images/${oldFile}`, (err) => { if (err) throw err})
+        res.status(200).json ({message: "Produit modifié !"})
     }
   })
   .catch((error) => {
@@ -80,8 +86,7 @@ exports.deleteSauce = (req, res, next) => {
             .catch(error => res.status(401).json({ error }));
         })
       }
-    }
-  )
+    })
   .catch(
     (error) => {
       res.status(500).json({error});
