@@ -1,9 +1,29 @@
+/* --- Importations --- */ 
+
 //importation d'Express 
 const express = require('express');
+//importation express-rate-limiter
+const rateLimit = require("express-rate-limit"); 
+//importation bodyParser
+const bodyParser = require('body-parser');
+//importation Helmet 
+const helmet = require('helmet');
+
+//limiter Config 
+const limiter = rateLimit({
+    //100 requête par heure/IP
+    max: 100, 
+    windowMs: 60 * 60 * 1000, 
+    message: "Nombre de tentatives de connexion atteint"
+});
+
+//fonction Express 
 const app = express();
 app.use(express.json()); 
-const bodyParser = require('body-parser');
 app.use(bodyParser.json());
+app.use(limiter); 
+app.use(helmet());
+
 
 
 //contrôle d'accès
@@ -11,6 +31,7 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
     next();
 });
 
