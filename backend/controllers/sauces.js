@@ -8,10 +8,10 @@ const { findOneAndUpdate } = require('../models/Sauce');
 
 /* ------ requête POST --------*/ 
 exports.createSauce = (req, res, next) => {
-    Sauce.findOne({ _id: req.params.id})
-    .then((sauce) => {
-
-    })
+    const sauceObject = JSON.parse(req.body.sauce)
+    //Utilisation des Regex pour sécuriser le formulaire 
+    const formCheck = new RegExp(/^[a-záàâäãåçéèêëíìîïñóòôöõúùûüýÿæœA-Z\s'-]{3,50}$/);
+    // if (formCheck.test(...sauceObject)){
 
     //l'id n'est pas nécessaire car il est directement généré par la BDD
     delete sauceObject._id;
@@ -27,6 +27,10 @@ exports.createSauce = (req, res, next) => {
     sauce.save()
     .then(() => {res.status(201).json({message: 'Création de la sauce'})})
     .catch(error => {res.status(400).json({error})})
+    // } 
+    // else {
+    //   return res.status(401).json({message: "Veuillez à ne pas utiliser de chiffres et de caractères spéciaux"})
+    // }
 };
 
 /* ----- requête GET (un produit) ------ */ 
@@ -100,37 +104,37 @@ exports.deleteSauce = (req, res, next) => {
 exports.getLikedDisliked = (req, res, next) => {
   Sauce.findOne({_id: req.params.id})
   .then((sauce) => {
-  /* -- l'utilisateur n'a pas encore liké mais souhaite le faire (like = 1) --*/ 
-  if (!sauce.usersLiked.includes(req.body.userId) && req.body.like === 1){
-    //mis à jour du produit et de la valeur de likes(1); ajout de l'user_id dans le tab usersLiked
-    Sauce.updateOne({ _id: req.params.id}, {$inc: {likes: +1}, $push: {usersLiked: req.body.userId}})
-    .then(() => res.status(200).json({message: "produit liké"}))
-    .catch((error) => res.status(400).json({error}));
-  
-    /* -- l'utilisateur à déjà liké et souhaite revenir en arrière (like = 0) --*/
-  } else if (sauce.usersLiked.includes(req.body.userId) && req.body.like === 0){
-    //valeur de like remise à zéro; l'userId est retiré du tableau 
-    Sauce.updateOne({ _id: req.params.id}, {$inc: {likes: -1}, $pull: {usersLiked: req.body.userId}})
-    .then(() => res.status(200).json({message: "like retiré"}))
-    .catch((error) => res.status(400).json({error}));
+    /* -- l'utilisateur n'a pas encore liké mais souhaite le faire (like = 1) --*/ 
+    if (!sauce.usersLiked.includes(req.body.userId)){
+      //mis à jour du produit et de la valeur de likes(1); ajout de l'user_id dans le tab usersLiked
+      Sauce.updateOne({ _id: req.params.id}, {$inc: {likes: +1}, $push: {usersLiked: req.body.userId}})
+      .then(() => res.status(200).json({message: "produit liké"}))
+      .catch((error) => res.status(400).json({error}));
+    
+      /* -- l'utilisateur à déjà liké et souhaite revenir en arrière (like = 0) --*/
+    } else if (sauce.usersLiked.includes(req.body.userId) && req.body.like === 0){
+      //valeur de like remise à zéro; l'userId est retiré du tableau 
+      Sauce.updateOne({ _id: req.params.id}, {$inc: {likes: -1}, $pull: {usersLiked: req.body.userId}})
+      .then(() => res.status(200).json({message: "like retiré"}))
+      .catch((error) => res.status(400).json({error}));
 
     /* -- L'utilisateur n'a pas encore disliké mais souhaite le faire (like = -1) -- */ 
     } else if (!sauce.usersDisliked.includes(req.body.userId) && req.body.like === -1){
-       //mis à jour du produit et de la valeur de likes(1); ajout de l'user_id dans le tab usersLiked
+      //mis à jour du produit et de la valeur de likes(1); ajout de l'user_id dans le tab usersLiked
       Sauce.updateOne({ _id: req.params.id}, {$inc: {dislikes: +1}, $push: {usersDisliked: req.body.userId}})
       .then(() => res.status(200).json({message: "produit disliké"}))
       .catch((error) => res.status(400).json({error}));
 
-      /* -- l'utilisateur à déjà disliké et souhaite revenir en arrière (like = 0) --*/
-      } else if (sauce.usersDisliked.includes(req.body.userId) && req.body.like === 0){
-        //mis à jour du produit et de la valeur de likes(1); ajout de l'user_id dans le tab usersLiked
-        Sauce.updateOne({ _id: req.params.id}, {$inc: {dislikes: -1}, $pull: {usersDisliked: req.body.userId}})
-        .then(() => res.status(200).json({message: "dislike retiré"}))
-        .catch((error) => res.status(400).json({error}));
+    /* -- l'utilisateur à déjà disliké et souhaite revenir en arrière (like = 0) --*/
+    } else if (sauce.usersDisliked.includes(req.body.userId) && req.body.like === 1){
+      //mis à jour du produit et de la valeur de likes(1); ajout de l'user_id dans le tab usersLiked
+      Sauce.updateOne({ _id: req.params.id}, {$inc: {dislikes: -1}, $pull: {usersDisliked: req.body.userId}})
+      .then(() => res.status(200).json({message: "dislike retiré"}))
+      .catch((error) => res.status(400).json({error}));
 
-      } else {
-          res.status(401).json({message: "l'opération n'a pas aboutie"})
-        }
+    } else {
+      res.status(401).json({message: "l'opération n'a pas aboutie"})
+    }
   })
   .catch((err) => res.status(404).json({err}));
 }
