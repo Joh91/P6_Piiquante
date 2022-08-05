@@ -10,27 +10,26 @@ const { findOneAndUpdate } = require('../models/Sauce');
 exports.createSauce = (req, res, next) => {
     const sauceObject = JSON.parse(req.body.sauce)
     //Utilisation des Regex pour sécuriser le formulaire 
-    const formCheck = new RegExp(/^[a-záàâäãåçéèêëíìîïñóòôöõúùûüýÿæœA-Z\s'-]{3,50}$/);
-    // if (formCheck.test(...sauceObject)){
-
-    //l'id n'est pas nécessaire car il est directement généré par la BDD
-    delete sauceObject._id;
-    //l'id en provenance du token sera celui utilisé pour l'authentification pour des raisons de sécurité 
-    delete sauceObject.userId
-    const sauce = new Sauce({
-        ...sauceObject,
-        userId: req.auth.userId,
-        // multer ne transmet que le nom, nous créeons ainsi l'URL manuellement
-        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
-    });
-    console.log(sauce); 
-    sauce.save()
-    .then(() => {res.status(201).json({message: 'Création de la sauce'})})
-    .catch(error => {res.status(400).json({error})})
-    // } 
-    // else {
-    //   return res.status(401).json({message: "Veuillez à ne pas utiliser de chiffres et de caractères spéciaux"})
-    // }
+    const formCheck = (/^[a-záàâäãåçéèêëíìîïñóòôöõúùûüýÿæœA-Z\s'-]{3,50}$/);
+    if (formCheck.test(sauceObject.name) && formCheck.test(sauceObject.manufacturer) && formCheck.test(sauceObject.description)  
+      && formCheck.test(sauceObject.mainPepper)){
+      //l'id n'est pas nécessaire car il est directement généré par la BDD
+      delete sauceObject._id;
+      //l'id en provenance du token sera celui utilisé pour l'authentification pour des raisons de sécurité 
+      delete sauceObject.userId
+      const sauce = new Sauce({
+          ...sauceObject,
+          userId: req.auth.userId,
+          // multer ne transmet que le nom, nous créeons ainsi l'URL manuellement
+          imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
+      });
+      console.log(sauce); 
+      sauce.save()
+      .then(() => {res.status(201).json({message: 'Création de la sauce'})})
+      .catch(error => {res.status(400).json({error})})
+    } else {
+      return res.status(401).json({message: "Veuillez ne pas utiliser de chiffres et de caractères spéciaux"})
+    }
 };
 
 /* ----- requête GET (un produit) ------ */ 

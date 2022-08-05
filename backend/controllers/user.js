@@ -4,29 +4,15 @@ const bcrypt = require("bcrypt");
 
 const jwt = require("jsonwebtoken");
 
-
-/*-- 
-Valider le mot de passe
-    var regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/;
-
-if (regex.test(req.body.password)) { ... } else {
-        return res.status(401).json({ message: 'Le mot de passe doit contenir au moins 8 caractères, un nombre, une minuscule, et une majuscule' });
-    } ---*/ 
-
-
-
-
-
-
 // création de compte 
 exports.signup = (req, res, next) => {
     //regex
-    
-    
-    
-    
-    
-    bcrypt.hash(req.body.password, 10)
+    //au moins 8 caractères, 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial
+    const regexPassword = (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/);
+    const regexEmail = (/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/);
+
+    if (regexPassword.test(req.body.password) && regexEmail.test(req.body.email)) { 
+        bcrypt.hash(req.body.password, 10)
         //la fonction renvoie le mail ainsi que le mdp sous forme de hash desormais 
         .then(hash => {
             const user = new User({
@@ -38,6 +24,9 @@ exports.signup = (req, res, next) => {
             .catch(error => res.status(400).json({error})); 
         })
         .catch(error => res.status(500).json({error}))
+    } else {
+        return res.status(401).json({ message: 'Veuillez saisir une adresse mail valide et un mot de passe contenant au moins 8 caractères, 1 majuscule, 1 minuscule, 1 chiffre et un 1 caractère spécial' });
+    }
 };
 
 // connexion à un compte existant
