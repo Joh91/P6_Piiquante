@@ -1,20 +1,24 @@
-/* --- Importations --- */ 
-
+/* --- Importations --- */
 //importation d'Express 
 const express = require('express');
 //importation express-rate-limiter
-const rateLimit = require("express-rate-limit"); 
+const rateLimit = require('express-rate-limit'); 
 //importation bodyParser
 const bodyParser = require('body-parser');
 //importation Helmet 
 const helmet = require('helmet');
+//importation Dotenv 
+const dotenv = require('dotenv').config('../.env');
+
+//Dotenv config 
+
 
 //limiter Config 
 const limiter = rateLimit({
     //100 requête par heure/IP
     max: 100, 
     windowMs: 60 * 60 * 1000, 
-    message: "Nombre de tentatives de connexion atteint"
+    message: "Nombre de requêtes atteint"
 });
 
 //fonction Express 
@@ -38,7 +42,7 @@ app.use((req, res, next) => {
 //connexion à la database
 const mongoose = require("mongoose"); 
 
-mongoose.connect("mongodb+srv://johann:P6_piiquanteDB@cluster0.jeifhdb.mongodb.net/?retryWrites=true&w=majority",
+mongoose.connect(`mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_CLUSTER}.jeifhdb.mongodb.net/?retryWrites=true&w=majority`,
   { useNewUrlParser: true,
     useUnifiedTopology: true })
   .then(() => console.log('Connexion à MongoDB réussie !'))
