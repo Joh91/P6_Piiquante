@@ -10,6 +10,8 @@ const dotenv = require('dotenv').config('../.env');
 //connexion aux routes 
 const saucesRoutes = require('./routes/sauces');
 const userRoutes = require('./routes/user');
+// importation mongoSanitize
+const mongoSanitize = require('express-mongo-sanitize');
 
 //Intégrations 
 const app = express();
@@ -26,6 +28,12 @@ app.use((req, res, next) => {
   res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
   next();
 });
+//configuration mongoSanitize 
+app.use(
+  mongoSanitize({
+    replaceWith: '_',
+  }),
+);
 
 //connexion à la database
 const mongoose = require('mongoose'); 
