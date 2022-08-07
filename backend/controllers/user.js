@@ -1,7 +1,9 @@
 const User = require("../models/User");
 // bcrypt va nous permettre de hasher le mdp  
 const bcrypt = require("bcrypt"); 
-
+//importation de crypto js pour chiffrer l'adresse mail 
+const cryptojs = require("crypto-js");
+//importation de jwt pour la création d'une token d'authentification 
 const jwt = require("jsonwebtoken");
 
 // création de compte 
@@ -12,11 +14,14 @@ exports.signup = (req, res, next) => {
     const regexEmail = (/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/);
 
     if (regexPassword.test(req.body.password) && regexEmail.test(req.body.email)) { 
+        //chiffrage de l'adresse-mail
+        const emailCryptoJs = cryptojs.SHA256(req.body.email, process.env.SECRET_KEYS).toString();
+        //hashage du mot de passe
         bcrypt.hash(req.body.password, 10)
         //la fonction renvoie le mail ainsi que le mdp sous forme de hash desormais 
         .then(hash => {
             const user = new User({
-                email: req.body.email,
+                email: emailCryptoJs,
                 password: hash,
             });
             user.save()
@@ -31,7 +36,8 @@ exports.signup = (req, res, next) => {
 
 // connexion à un compte existant
 exports.login = (req, res, next) => {
-    User.findOne({email: req.body.email})
+    const emailCryptoJs = cryptojs.SHA256(req.body.email, process.env.SECRET_KEYS).toString();
+    User.findOne({email: emailCryptoJs})
     .then(user => {
         if (user === null){
             res.status(401).json({message: "identifiant et/ou mot de pas incorrect(s)"}); 
