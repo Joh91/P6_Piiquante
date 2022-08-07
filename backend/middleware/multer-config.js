@@ -1,5 +1,7 @@
+// importation de multer
 const multer = require("multer");
 
+// Définition des formats acceptés 
 const MIME_TYPES = {
     'image/jpg': 'jpg',
     'image/jpeg': 'jpg',

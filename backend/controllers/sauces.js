@@ -4,7 +4,7 @@ const Sauce = require('../models/Sauce');
 /*- importation du package fs qui permet d'accèder aux fonctions de suppression et 
 de modification d'un fichier -*/ 
 const fs = require('fs');
-const { findOneAndUpdate } = require('../models/Sauce');
+// const findOneAndUpdate = require('../models/Sauce');
 
 /* ------ requête POST --------*/ 
 exports.createSauce = (req, res, next) => {
@@ -34,6 +34,7 @@ exports.createSauce = (req, res, next) => {
 
 /* ----- requête GET (un produit) ------ */ 
 exports.getOneSauce = (req, res, next) => {
+  //requête auprès de la db pour afficher le produit selon son id 
   Sauce.findOne({ _id: req.params.id})
   .then((sauce) => {res.status(200).json(sauce)})
   .catch((error) => {res.status(404).json({error})})
@@ -41,6 +42,7 @@ exports.getOneSauce = (req, res, next) => {
 
 /* ------ requête GET (tous les produits) -------*/ 
 exports.getAllSauce = (req, res, next) => {
+  //requête auprès de la db pour afficher tous les produits
   Sauce.find()
   .then((sauces) => {res.status(200).json(sauces);})
   .catch((error) => {res.status(400).json({error: error})})
@@ -48,19 +50,20 @@ exports.getAllSauce = (req, res, next) => {
 
 /*--------- requête PUT ----------*/
 exports.modifySauce = (req, res, next) => {
-  //valeurs à modifier; "req files ? " vérifie si un fichier à été ajouté 
-  //1er cas: un nouveau fichier est retourné 
+  //valeurs à modifier; "req files ? " vérifie si un fichier est présent
+  //1er cas: fichier présent
   const sauceObject = req.file 
   ? {
     ...JSON.parse(req.body.sauce),
     imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
   } 
-  //2e cas: pas de nouveau fichier ajouté
+  //2e cas: pas de fichier présent
   : {...req.body}; 
 
   //suppression de l'user id dans notre objet pour des raisons de sécurité 
   delete sauceObject.user_id; 
   
+  // actualisation des nouvelles données dans notre db 
   Sauce.findOneAndUpdate({_id: req.params.id}, {...sauceObject, _id: req.params.id})
   .then((sauce) => {
     //auth
@@ -80,11 +83,14 @@ exports.modifySauce = (req, res, next) => {
 
 /* ------- requête DELETE -------- */ 
 exports.deleteSauce = (req, res, next) => {
+  // requête auprès de notre db pour selectionner le produit à supprimer
   Sauce.findOne({_id: req.params.id})
   .then(sauce => {
+    // auth
       if (sauce.userId != req.auth.userId) {
         res.status(401).json({message: "non-authorisé"});
       } else {
+        // suppression du produit et du fichier associé 
         const filename = sauce.imageUrl.split("/images/")[1]; 
         fs.unlink(`images/${filename}`, () => {
             sauce.deleteOne({_id: req.params.id})
@@ -101,6 +107,7 @@ exports.deleteSauce = (req, res, next) => {
 
 /* --------- Like & Dislike ------------- */ 
 exports.getLikedDisliked = (req, res, next) => {
+  // requête auprès de notre db pour selectionner le produit à liker/disliker 
   Sauce.findOne({_id: req.params.id})
   .then((sauce) => {
     /* -- l'utilisateur n'a pas encore liké mais souhaite le faire (like = 1) --*/ 

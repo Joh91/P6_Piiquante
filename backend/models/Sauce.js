@@ -1,6 +1,7 @@
-//Définition du modele de données 
+// importation de mongoose pour la création du schema de données
 const mongoose = require('mongoose');
 
+//Définition du modele de données 
 const sauceSchema = mongoose.Schema({
   userId: { type: String, required: true },
   name: { type: String, required: true },

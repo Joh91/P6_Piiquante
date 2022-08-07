@@ -1,8 +1,9 @@
-//définition des modèles Users afin d'enregistrer les données dans la database 
+// importation de mongoose pour la création du schema de données
 const mongoose = require("mongoose"); 
-//permet la création avec un mail unique
+//importation de unique validator pour l'utilisation d'un mail unique
 const uniqueValidator = require("mongoose-unique-validator"); 
 
+//définition des modèles Users afin d'enregistrer les données dans la database
 const userSchema = mongoose.Schema({
     email: {type: String, required: true, unique: true},
     password: {type: String, required: true }
