@@ -63,23 +63,31 @@ exports.modifySauce = (req, res, next) => {
   //suppression de l'user id dans notre objet pour des raisons de sécurité 
   delete sauceObject.user_id; 
   
-  // actualisation des nouvelles données dans notre db 
-  Sauce.findOneAndUpdate({_id: req.params.id}, {...sauceObject, _id: req.params.id})
-  .then((sauce) => {
-    //auth
-    if (sauce.userId != req.auth.userId){
-        res.status(401).json({ message : "Non-autorisé"});
+  //Utilisation des Regex pour sécuriser le formulaire 
+  const formCheck = (/^[a-záàâäãåçéèêëíìîïñóòôöõúùûüýÿæœA-Z\s'-]{3,50}$/);
+  if (formCheck.test(sauceObject.name) && formCheck.test(sauceObject.manufacturer) && formCheck.test(sauceObject.description)  
+    && formCheck.test(sauceObject.mainPepper)){ 
+      // actualisation des nouvelles données dans notre db 
+      Sauce.findOneAndUpdate({_id: req.params.id}, {...sauceObject, _id: req.params.id})
+      .then((sauce) => {
+        //auth
+        if (sauce.userId != req.auth.userId){
+            res.status(401).json({ message : "Non-autorisé"});
+        } else {
+          //récupération du fichier précédent et suppression
+            let oldFile = sauce.imageUrl.split('images/')[1];
+            fs.unlink(`images/${oldFile}`, () => {
+            res.status(200).json ({message: "Produit modifié !"})})
+        }
+      })
+      .catch((error) => {
+        res.status(400).json({error})
+      })
     } else {
-      //récupération du fichier précédent et suppression
-        let oldFile = sauce.imageUrl.split('images/')[1];
-        fs.unlink(`images/${oldFile}`, (err) => { if (err) throw err})
-        res.status(200).json ({message: "Produit modifié !"})
+      return res.status(401).json({message: "Veuillez ne pas utiliser de chiffres et de caractères spéciaux"})
     }
-  })
-  .catch((error) => {
-    res.status(400).json({error})
-  })
-};
+  }
+  
 
 /* ------- requête DELETE -------- */ 
 exports.deleteSauce = (req, res, next) => {
