@@ -8,4 +8,4 @@ app.set("port", process.env.PORT || process.env.SERVER_PORT )
 
 //intégration de l'app en parametre de notre fonction server 
 const server = http.createServer(app);
-server.listen(process.env.PORT || process.env.SERVER_PORT );
+server.listen(process.env.PORT || 3000 );

@@ -5,8 +5,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 //importation Helmet 
 const helmet = require('helmet');
+
+const path = require('path')
 //importation Dotenv 
-const dotenv = require('dotenv').config('../.env');
+require('dotenv').config({path:"./config/.env"});
 //connexion aux routes 
 const saucesRoutes = require('./routes/sauces');
 const userRoutes = require('./routes/user');
@@ -43,8 +45,7 @@ mongoose.connect(`mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGOD
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
 
-// Utilisation du router pour définir les routes 
-const path = require('path');
+// Utilisation du router pour définir les routes ;
 app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/api/sauces', saucesRoutes);
 app.use('/api/auth', userRoutes);
