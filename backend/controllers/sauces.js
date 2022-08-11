@@ -140,7 +140,7 @@ exports.getLikedDisliked = (req, res, next) => {
       .catch((error) => res.status(400).json({error}));
 
     /* -- l'utilisateur à déjà disliké et souhaite revenir en arrière (dislike = 0) --*/
-    } else if (sauce.usersDisliked.includes(req.body.userId) && req.body.dislike === 1){
+    } else if (sauce.usersDisliked.includes(req.body.userId) && req.body.dislike === 0){
       //mis à jour du produit et de la valeur de likes(1); ajout de l'user_id dans le tab usersLiked
       Sauce.updateOne({ _id: req.params.id}, {$inc: {dislikes: -1}, $pull: {usersDisliked: req.body.userId}})
       .then(() => res.status(200).json({message: "dislike retiré"}))
