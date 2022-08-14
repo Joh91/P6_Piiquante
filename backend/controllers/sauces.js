@@ -4,7 +4,7 @@ const Sauce = require('../models/Sauce');
 /*- importation du package fs qui permet d'accèder aux fonctions de suppression et 
 de modification d'un fichier -*/ 
 const fs = require('fs');
-// const findOneAndUpdate = require('../models/Sauce');
+
 
 /* ------ requête POST --------*/ 
 exports.createSauce = (req, res, next) => {
