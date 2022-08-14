@@ -48,7 +48,7 @@ exports.login = (req, res, next) => {
     .then(user => {
         // si la correspondance n'aboutie pas 
         if (user === null){
-            res.status(401).json({message: "identifiant et/ou mot de pas incorrect(s)"}); 
+            res.status(401).json({message: "identifiant et/ou mot de passe incorrect(s)"}); 
         } 
         // si correspondance
         else {
@@ -57,7 +57,7 @@ exports.login = (req, res, next) => {
             .then(valid => {
                 // si la correspondance n'aboutie pas 
                 if(!valid) {
-                    res.status(401).json({message: "identifiant et/ou mot de pas incorrect(s)"})
+                    res.status(401).json({message: "identifiant et/ou mot de passe incorrect(s)"})
                 } 
                 // si correspondance retourne l'userId et le token d'authentification 
                 else {
